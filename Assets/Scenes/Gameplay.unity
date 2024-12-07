@@ -249,10 +249,10 @@ RectTransform:
   - {fileID: 1369100221}
   m_Father: {fileID: 1503075805}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -300, y: 0}
-  m_SizeDelta: {x: 600, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &886644315
 MonoBehaviour:
@@ -322,6 +322,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 886644313}
   m_CullTransparentMesh: 1
+--- !u!1 &995448002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 995448003}
+  m_Layer: 0
+  m_Name: GameHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &995448003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 995448002}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 7, y: 7, z: 7}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1270887849
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,10 +454,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 886644314}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -300, y: -389.0179}
-  m_SizeDelta: {x: 600, y: 778.0358}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 2400, y: 1120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1369100222
 MonoBehaviour:
@@ -441,13 +472,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 25
-    m_Bottom: 0
-  m_ChildAlignment: 1
+    m_Left: 100
+    m_Right: 100
+    m_Top: 200
+    m_Bottom: 200
+  m_ChildAlignment: 0
   m_StartCorner: 0
-  m_StartAxis: 1
+  m_StartAxis: 0
   m_CellSize: {x: 250, y: 250}
   m_Spacing: {x: 100, y: 50}
   m_Constraint: 0
@@ -603,7 +634,7 @@ GameObject:
   - component: {fileID: 1755350496}
   - component: {fileID: 1755350495}
   m_Layer: 0
-  m_Name: SpawnPieces
+  m_Name: GameManajer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -621,12 +652,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02b5bab4c7c9df74a960ba2e837fba30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  difficulty: 2
+  gameHolder: {fileID: 995448003}
+  piecePrefab: {fileID: 490529015460308483, guid: 43a519a1b2c4bba4387ce10084194536, type: 3}
   imageTexture:
   - {fileID: 2800000, guid: fa2930e36f0941c44bc4443b822086af, type: 3}
-  - {fileID: 2800000, guid: 8a8d3cc2a10aff14a96169caa564d371, type: 3}
-  - {fileID: 2800000, guid: f2995974df17ae94482714fdaebd29cd, type: 3}
-  - {fileID: 2800000, guid: f2995974df17ae94482714fdaebd29cd, type: 3}
-  - {fileID: 2800000, guid: f2995974df17ae94482714fdaebd29cd, type: 3}
   levelSelectPanel: {fileID: 1369100221}
   levelSelectPrefab: {fileID: 1990190538017501033, guid: 397740552cc24754faaaaf919efaee17, type: 3}
 --- !u!224 &1755350496
@@ -656,3 +686,4 @@ SceneRoots:
   - {fileID: 1503075805}
   - {fileID: 1270887852}
   - {fileID: 1755350496}
+  - {fileID: 995448003}
