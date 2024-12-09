@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class ProceduralPuzzle : MonoBehaviour
 {
@@ -25,49 +26,8 @@ public class ProceduralPuzzle : MonoBehaviour
 
     void Start()
     {
-        for (int i = 0; i < imageTextures.Count; i++)
-        {
-            Texture2D texture = imageTextures[i];
-
-            // Instansiasi prefab pada levelSelectPanel dan tentukan sebagai child
-            Image imagePrefab = Instantiate(levelSelectPrefab, levelSelectPanel);
-
-            // Cari GameObject dengan tag "Image" dalam prefab yang diinstansiasi
-            Transform imageTransform = imagePrefab.transform.Find("Image");
-
-            if (imageTransform != null)
-            {
-                // Ambil komponen Image pada objek yang ditemukan
-                Image imageComponent = imageTransform.GetComponent<Image>();
-
-                if (imageComponent != null)
-                {
-                    // Ganti sprite dengan texture dari list
-                    imageComponent.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-                }
-                else
-                {
-                    Debug.LogWarning("Komponen Image tidak ditemukan pada GameObject 'Image'!");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("GameObject dengan tag 'Image' tidak ditemukan dalam prefab!");
-            }
-
-            // Menyimpan level index untuk digunakan di listener
-            int levelIndex = i;
-
-            // Menambahkan listener pada button di dalam prefab untuk menjalankan StartGame()
-            imagePrefab.GetComponent<Button>().onClick.AddListener(delegate { StartGame(texture, levelIndex); });
-
-
-        }
+        SpawnLevel();
     }
-
-
-
-
 
     private void Update()
     {
@@ -95,6 +55,39 @@ public class ProceduralPuzzle : MonoBehaviour
             Vector3 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             newPosition += offset;
             draggingPiece.position = newPosition;
+        }
+    }
+
+    private void SpawnLevel()
+    {
+        for (int i = 0; i < imageTextures.Count; i++)
+        {
+            Texture2D texture = imageTextures[i];
+            Image imagePrefab = Instantiate(levelSelectPrefab, levelSelectPanel);
+
+            Transform imageTransform = imagePrefab.transform.Find("Image");
+
+            if (imageTransform != null)
+            {
+                Image imageComponent = imageTransform.GetComponent<Image>();
+
+                if (imageComponent != null)
+                {
+                    imageComponent.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+
+                    Color initialColor = imageComponent.color;
+                    imageComponent.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
+
+                    imageComponent.DOFade(1f, 0.5f).SetDelay(i * 0.75f); 
+                }
+                else
+                {
+                    Debug.LogWarning("Image kosong");
+                }
+            }
+
+            int levelIndex = i;
+            imagePrefab.GetComponent<Button>().onClick.AddListener(delegate { StartGame(texture, levelIndex); });
         }
     }
 
