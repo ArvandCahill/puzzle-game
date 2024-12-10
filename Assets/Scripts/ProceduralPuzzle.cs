@@ -10,6 +10,7 @@ public class ProceduralPuzzle : MonoBehaviour
     [SerializeField] private List<int> difficulties; 
     [SerializeField] private Transform gameHolder;
     [SerializeField] private Transform piecePrefab;
+    [SerializeField] private List<AudioClip> PieceSFX;
 
     [Header("UI Elements")]
     [SerializeField] private List<Texture2D> imageTextures;
@@ -21,12 +22,16 @@ public class ProceduralPuzzle : MonoBehaviour
     private float width;
     private float height;
     private Vector3 offset;
+    private int piecesCorrect;
 
     private Transform draggingPiece = null;
+    private SoundEffect sfx;
+    private GameObject hintQuad;
 
     void Start()
     {
         SpawnLevel();
+        sfx = GetComponent<SoundEffect>();
     }
 
     private void Update()
@@ -60,6 +65,12 @@ public class ProceduralPuzzle : MonoBehaviour
 
     private void SpawnLevel()
     {
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetGameStateToLevelSelector();
+        }
+
         for (int i = 0; i < imageTextures.Count; i++)
         {
             Texture2D texture = imageTextures[i];
@@ -78,7 +89,7 @@ public class ProceduralPuzzle : MonoBehaviour
                     Color initialColor = imageComponent.color;
                     imageComponent.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
 
-                    imageComponent.DOFade(1f, 0.5f).SetDelay(i * 0.75f); 
+                    imageComponent.DOFade(1f, 0.5f).SetDelay(i * 0.75f);
                 }
                 else
                 {
@@ -90,6 +101,7 @@ public class ProceduralPuzzle : MonoBehaviour
             imagePrefab.GetComponent<Button>().onClick.AddListener(delegate { StartGame(texture, levelIndex); });
         }
     }
+
 
     public void StartGame(Texture2D jigsawTexture, int levelIndex)
     {
@@ -106,6 +118,13 @@ public class ProceduralPuzzle : MonoBehaviour
         Scatter();
 
         UpdateBorder(jigsawTexture);
+
+        piecesCorrect = 0;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetGameStateToPlaying();
+        }
     }
 
     Vector2Int GetDimensions(Texture2D jigsawTexture, int difficulty)
@@ -201,7 +220,7 @@ public class ProceduralPuzzle : MonoBehaviour
     }
 
 
-    private void UpdateBorder(Texture2D jigsawTexture)
+    public void UpdateBorder(Texture2D jigsawTexture)
     {
         LineRenderer lineRenderer = gameHolder.GetComponent<LineRenderer>();
 
@@ -220,10 +239,14 @@ public class ProceduralPuzzle : MonoBehaviour
 
         lineRenderer.enabled = true;
 
-        GameObject hintQuad = new GameObject("HintBackground");
+        if (hintQuad != null)
+        {
+            Destroy(hintQuad);
+        }
+
+        hintQuad = new GameObject("HintBackground");
         hintQuad.transform.parent = gameHolder;
         hintQuad.transform.localPosition = new Vector3(0, 0, borderZ + 0.1f);
-
         hintQuad.transform.localScale = new Vector3(width * dimensions.x, height * dimensions.y, 1f);
 
         MeshRenderer meshRenderer = hintQuad.AddComponent<MeshRenderer>();
@@ -231,7 +254,6 @@ public class ProceduralPuzzle : MonoBehaviour
         meshFilter.mesh = CreateQuadMesh();
 
         Material hintMaterial = new Material(Shader.Find("Standard"));
-
         hintMaterial.mainTexture = jigsawTexture;
 
         hintMaterial.SetFloat("_Mode", 3);
@@ -245,7 +267,6 @@ public class ProceduralPuzzle : MonoBehaviour
 
         float alphaValue = 150f / 255f;
         Color albedoColor = new Color(1f, 1f, 1f, alphaValue);
-
         hintMaterial.SetColor("_Color", albedoColor);
 
         meshRenderer.material = hintMaterial;
@@ -266,6 +287,8 @@ public class ProceduralPuzzle : MonoBehaviour
             draggingPiece.localPosition = targetPosistion;
             draggingPiece.GetComponent<BoxCollider2D>().enabled = false;
         }
+
+        piecesCorrect++;
     }
 
     private Mesh CreateQuadMesh()
@@ -292,5 +315,29 @@ public class ProceduralPuzzle : MonoBehaviour
         };
 
         return mesh;
+    }
+
+    public void RestartGame()
+    {
+        foreach (Transform piece in pieces)
+        {
+            Destroy(piece.gameObject);
+        }
+
+        pieces.Clear();
+        gameHolder.GetComponent<LineRenderer>().enabled = false;
+        levelSelectPanel.gameObject.SetActive(true);
+        
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetGameStateToLevelSelector();
+        }
+
+        if (hintQuad != null)
+        {
+            Destroy(hintQuad);
+            hintQuad = null; 
+        }
     }
 }
