@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using UnityEngine.Audio;
 
 public class ProceduralPuzzle : MonoBehaviour
 {
@@ -16,6 +17,15 @@ public class ProceduralPuzzle : MonoBehaviour
     [SerializeField] private List<Texture2D> imageTextures;
     [SerializeField] private Transform levelSelectPanel;
     [SerializeField] private Image levelSelectPrefab;
+    [SerializeField] private GameObject starParticle;
+
+    [Header("Sound Effects")]
+    private SoundEffect soundEffect;
+    private AudioSource sfxAudioSource;
+    public AudioMixer audioMixer;
+    public AudioClip puzzleSnap;
+    public AudioClip puzzleScatter;
+    public AudioClip puzzleDone;
 
     private List<Transform> pieces;
     private Vector2Int dimensions;
@@ -25,41 +35,57 @@ public class ProceduralPuzzle : MonoBehaviour
     private int piecesCorrect;
 
     private Transform draggingPiece = null;
-    private SoundEffect sfx;
     private GameObject hintQuad;
+
+    private void Awake()
+    {
+        soundEffect = GetComponent<SoundEffect>();
+        sfxAudioSource = GetComponent<AudioSource>();
+    }
 
     void Start()
     {
         SpawnLevel();
-        sfx = GetComponent<SoundEffect>();
     }
 
-    private void Update()
+    void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-            if (hit)
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
+            touchPosition.z = 0; 
+
+            switch (touch.phase)
             {
-                draggingPiece = hit.transform;
-                offset = draggingPiece.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                offset += Vector3.back;
+                case TouchPhase.Began:
+                    RaycastHit2D hit = Physics2D.Raycast(touchPosition, Vector2.zero);
+                    if (hit)
+                    {
+                        draggingPiece = hit.transform;
+                        offset = draggingPiece.position - touchPosition;
+                        offset += Vector3.back;
+                    }
+                    break;
+
+                case TouchPhase.Moved:
+                    if (draggingPiece)
+                    {
+                        Vector3 newPosition = touchPosition + offset;
+                        draggingPiece.position = newPosition;
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                    if (draggingPiece)
+                    {
+                        SnapAndDisableIfCorrect();
+                        draggingPiece.position += Vector3.forward;
+                        draggingPiece = null;
+                    }
+                    break;
             }
-        }
-
-        if (draggingPiece && Input.GetMouseButtonUp(0))
-        {
-            SnapAndDisableIfCorrect();
-            draggingPiece.position += Vector3.forward;
-            draggingPiece = null;
-        }
-
-        if (draggingPiece)
-        {
-            Vector3 newPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            newPosition += offset;
-            draggingPiece.position = newPosition;
         }
     }
 
@@ -200,8 +226,10 @@ public class ProceduralPuzzle : MonoBehaviour
             float y = Random.Range(-orthoHeight, orthoHeight);
             Vector3 targetPosition = new Vector3(x, y, -1);
 
-            StartCoroutine(MovePiece(piece, startPosition, targetPosition, 1f)); 
+            StartCoroutine(MovePiece(piece, startPosition, targetPosition, 0.65f)); 
         }
+
+        StartCoroutine(soundEffect.PlaySFXDelay(sfxAudioSource, puzzleScatter, 0.35f));
     }
 
     private IEnumerator MovePiece(Transform piece, Vector3 startPosition, Vector3 targetPosition, float duration)
@@ -286,9 +314,17 @@ public class ProceduralPuzzle : MonoBehaviour
         {
             draggingPiece.localPosition = targetPosistion;
             draggingPiece.GetComponent<BoxCollider2D>().enabled = false;
+            StartCoroutine(soundEffect.PlaySFXDelay(sfxAudioSource, puzzleSnap, 0.1f));
+            piecesCorrect++;
         }
 
-        piecesCorrect++;
+
+        if (piecesCorrect == pieces.Count)
+        {
+            starParticle.SetActive(true);
+            StartCoroutine(soundEffect.PlaySFXDelay(sfxAudioSource, puzzleDone, 0.5f));
+        }
+
     }
 
     private Mesh CreateQuadMesh()
@@ -327,7 +363,7 @@ public class ProceduralPuzzle : MonoBehaviour
         pieces.Clear();
         gameHolder.GetComponent<LineRenderer>().enabled = false;
         levelSelectPanel.gameObject.SetActive(true);
-        
+        starParticle.SetActive(false);
 
         if (GameManager.Instance != null)
         {
@@ -339,5 +375,7 @@ public class ProceduralPuzzle : MonoBehaviour
             Destroy(hintQuad);
             hintQuad = null; 
         }
+
     }
+
 }

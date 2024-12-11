@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Image
   - Back
+  - SoundButton
   layers:
   - Default
   - TransparentFX
