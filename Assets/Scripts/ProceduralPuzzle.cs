@@ -115,7 +115,7 @@ public class ProceduralPuzzle : MonoBehaviour
                     Color initialColor = imageComponent.color;
                     imageComponent.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
 
-                    imageComponent.DOFade(1f, 0.5f).SetDelay(i * 0.75f);
+                    imageComponent.DOFade(1f, 0.25f).SetDelay(i * 0.25f);
                 }
                 else
                 {
